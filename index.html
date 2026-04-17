@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexions — ES / DE à travers le français</title>
+<meta name="description" content="Entraîneur de liaisons conceptuelles : phrases parallèles en espagnol et en allemand, passerelle en français. Sans recours au russe.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f5f0eb;
+    --ink: #2c2c2c;
+    --mute: #8a8a8a;
+    --line: #e5ddd2;
+    --card: #ffffff;
+    --es: #c0392b;
+    --de: #2c3e50;
+    --fr: #9a7d0a;
+    --en: #2d6a4f;
+    --accent: #6c3b8a;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 28px 18px 80px;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 1.35em;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  h1 .brain { margin-right: 6px; }
+  .sub {
+    color: var(--mute);
+    font-size: 0.88em;
+  }
+  .counter {
+    color: var(--mute);
+    font-size: 0.88em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scene {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    padding: 26px 24px 18px;
+    margin-top: 20px;
+  }
+  .concept-label {
+    font-size: 0.72em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 6px;
+  }
+  .concept {
+    font-size: 1.55em;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .core {
+    font-size: 0.95em;
+    color: var(--mute);
+    font-style: italic;
+    margin-bottom: 18px;
+  }
+
+  .tense {
+    border-top: 1px solid var(--line);
+    padding: 14px 0 12px;
+  }
+  .tense-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tense-name {
+    font-size: 0.82em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .nuance {
+    flex: 1;
+    color: var(--mute);
+    font-size: 0.9em;
+    font-style: italic;
+  }
+  .toggle {
+    color: var(--mute);
+    font-size: 0.8em;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  .sentences {
+    margin-top: 10px;
+    padding-left: 2px;
+  }
+  .line {
+    display: none;
+    grid-template-columns: 28px 1fr 32px;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 1.02em;
+    align-items: start;
+  }
+  .tense[data-stage="1"] .line.fr,
+  .tense[data-stage="2"] .line.fr,
+  .tense[data-stage="2"] .line.en,
+  .tense[data-stage="3"] .line.fr,
+  .tense[data-stage="3"] .line.en,
+  .tense[data-stage="3"] .line.de,
+  .tense[data-stage="4"] .line.fr,
+  .tense[data-stage="4"] .line.en,
+  .tense[data-stage="4"] .line.de,
+  .tense[data-stage="4"] .line.es { display: grid; }
+  .tag {
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding-top: 4px;
+  }
+  .tag.es { color: var(--es); }
+  .tag.de { color: var(--de); }
+  .tag.fr { color: var(--fr); }
+  .tag.en { color: var(--en); }
+  .line.fr { opacity: 0.9; }
+  .line.en { opacity: 0.9; }
+
+  .speak {
+    background: transparent;
+    border: none;
+    color: var(--mute);
+    font-size: 1.05em;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .speak:hover, .speak:active { color: var(--accent); background: #f3edf6; }
+  .speak.playing { color: var(--accent); }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 20px;
+  }
+  button.nav {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.92em;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  button.nav:hover { border-color: var(--accent); color: var(--accent); }
+  button.nav.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  button.nav.primary:hover { background: #5a3074; color: white; }
+  .spacer { flex: 1; }
+
+  .opts {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    color: var(--mute);
+    font-size: 0.88em;
+  }
+  .opts label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .hint {
+    margin-top: 18px;
+    color: var(--mute);
+    font-size: 0.82em;
+    line-height: 1.55;
+  }
+  kbd {
+    background: #eee3d4;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: inherit;
+    font-size: 0.85em;
+    color: var(--ink);
+  }
+
+  @media (max-width: 520px) {
+    h1 { font-size: 1.15em; }
+    .concept { font-size: 1.25em; }
+    .scene { padding: 20px 16px 14px; }
+    .line { font-size: 0.98em; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="brain">🧠</span>Connexions — FR · EN · DE · ES</h1>
+    <div class="counter" id="counter">—</div>
+  </header>
+  <div class="sub">Chaque scène en 4 temps. Pense par le concept, pas par la traduction.</div>
+
+  <div class="scene" id="scene"></div>
+
+  <div class="controls">
+    <button class="nav" id="prev">← Précédent</button>
+    <button class="nav primary" id="revealAll">Tout révéler</button>
+    <button class="nav" id="hideAll">Tout cacher</button>
+    <div class="spacer"></div>
+    <button class="nav" id="shuffle">Mélanger</button>
+    <button class="nav" id="next">Suivant →</button>
+  </div>
+
+  <div class="hint">
+    Par temps, un clic révèle dans l'ordre : <b>FR</b> (modèle) → <b>EN</b> (pont germanique) → <b>DE</b> (cible) → <b>ES</b> (contrôle roman). Essaie de produire la phrase en allemand avant de cliquer sur DE. Touche 🔊 pour écouter.<br>
+    <kbd>espace</kbd> étape suivante · <kbd>↓</kbd> <kbd>↑</kbd> changer de temps · <kbd>←</kbd> <kbd>→</kbd> scène précédente / suivante · <kbd>R</kbd> tout révéler · <kbd>S</kbd> mélanger · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> écouter FR/EN/DE/ES
+  </div>
+</div>
+
+<script src="scenes.js"></script>
+<script>
+  const sceneEl = document.getElementById('scene');
+  const counterEl = document.getElementById('counter');
+
+  // Synthèse vocale
+  let voices = [];
+  function loadVoices() { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+  if (window.speechSynthesis) {
+    loadVoices();
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  }
+  function pickVoice(bcp) {
+    if (!voices.length) return null;
+    const exact = voices.find(v => v.lang === bcp);
+    if (exact) return exact;
+    const base = bcp.split('-')[0];
+    return voices.find(v => v.lang.startsWith(base)) || null;
+  }
+  let currentBtn = null;
+  function speak(btn, text, bcp) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    if (currentBtn) currentBtn.classList.remove('playing');
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = bcp;
+    const v = pickVoice(bcp);
+    if (v) u.voice = v;
+    u.rate = bcp.startsWith('de') ? 0.9 : 1.0;
+    u.onend = u.onerror = () => { if (btn) btn.classList.remove('playing'); };
+    if (btn) { btn.classList.add('playing'); currentBtn = btn; }
+    speechSynthesis.speak(u);
+  }
+  window.speak = speak;
+
+  function speakTenseLang(langKey) {
+    const bcpMap = { fr: 'fr-FR', en: 'en-US', de: 'de-DE', es: 'es-ES' };
+    const scene = SCENES[order[idx]];
+    const t = scene.tenses[focusTenseIdx];
+    if (!t) return;
+    const btn = sceneEl.querySelector(`.tense[data-ti="${focusTenseIdx}"] .line.${langKey} .speak`);
+    speak(btn, t[langKey], bcpMap[langKey]);
+  }
+
+  let order = SCENES.map((_, i) => i);
+  let idx = 0;
+  let focusTenseIdx = 0;
+
+  function render() {
+    const scene = SCENES[order[idx]];
+    focusTenseIdx = 0;
+    counterEl.textContent = `${idx + 1} / ${SCENES.length}`;
+
+    const langs = [
+      { k: 'fr', label: 'FR', bcp: 'fr-FR' },
+      { k: 'en', label: 'EN', bcp: 'en-US' },
+      { k: 'de', label: 'DE', bcp: 'de-DE' },
+      { k: 'es', label: 'ES', bcp: 'es-ES' }
+    ];
+    const tensesHtml = scene.tenses.map((t, i) => {
+      const lines = langs.map(L => `
+        <div class="line ${L.k}">
+          <span class="tag ${L.k}">${L.label}</span>
+          <span>${t[L.k]}</span>
+          <button class="speak" type="button" onclick="event.stopPropagation(); speak(this, ${JSON.stringify(t[L.k])}, '${L.bcp}')" aria-label="Écouter">🔊</button>
+        </div>
+      `).join('');
+      return `
+        <div class="tense" data-ti="${i}" data-stage="0">
+          <div class="tense-head" onclick="stepTense(${i})">
+            <span class="tense-name">${t.name}</span>
+            <span class="nuance">${t.nuance}</span>
+            <button class="toggle" type="button">voir FR</button>
+          </div>
+          <div class="sentences">${lines}</div>
+        </div>`;
+    }).join('');
+
+    sceneEl.innerHTML = `
+      <div class="concept-label">Scène</div>
+      <div class="concept">${scene.concept}</div>
+      <div class="core">${scene.core}</div>
+      ${tensesHtml}
+    `;
+  }
+
+  const BTN_LABELS = ['voir FR', 'voir EN', 'voir DE', 'voir ES', 'cacher'];
+  const MAX_STAGE = 4;
+
+  function setStage(el, stage) {
+    el.setAttribute('data-stage', stage);
+    const btn = el.querySelector('.toggle');
+    if (btn) btn.textContent = BTN_LABELS[stage];
+  }
+
+  function stepTense(i) {
+    const el = sceneEl.querySelector(`.tense[data-ti="${i}"]`);
+    if (!el) return;
+    focusTenseIdx = i;
+    const cur = parseInt(el.getAttribute('data-stage') || '0', 10);
+    const next = cur >= MAX_STAGE ? 0 : cur + 1;
+    setStage(el, next);
+  }
+
+  function setAll(stage) {
+    sceneEl.querySelectorAll('.tense').forEach(el => setStage(el, stage));
+  }
+
+  function next() { idx = (idx + 1) % SCENES.length; render(); }
+  function prev() { idx = (idx - 1 + SCENES.length) % SCENES.length; render(); }
+  function shuffle() {
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    idx = 0;
+    render();
+  }
+
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  document.getElementById('revealAll').onclick = () => setAll(MAX_STAGE);
+  document.getElementById('hideAll').onclick = () => setAll(0);
+  document.getElementById('shuffle').onclick = shuffle;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight') { next(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { prev(); e.preventDefault(); }
+    else if (e.key === 'ArrowDown') { focusTenseIdx = (focusTenseIdx + 1) % 4; e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { focusTenseIdx = (focusTenseIdx - 1 + 4) % 4; e.preventDefault(); }
+    else if (e.key === ' ') { stepTense(focusTenseIdx); e.preventDefault(); }
+    else if (e.key === 'r' || e.key === 'R') { setAll(MAX_STAGE); }
+    else if (e.key === 's' || e.key === 'S') { shuffle(); }
+    else if (e.key === '1') { speakTenseLang('fr'); }
+    else if (e.key === '2') { speakTenseLang('en'); }
+    else if (e.key === '3') { speakTenseLang('de'); }
+    else if (e.key === '4') { speakTenseLang('es'); }
+  });
+
+  render();
+</script>
+</body>
+</html>
