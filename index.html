@@ -265,6 +265,26 @@
   const sceneEl = document.getElementById('scene');
   const counterEl = document.getElementById('counter');
 
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;');
+  }
+
+  // Délégation clics
+  sceneEl.addEventListener('click', (e) => {
+    const sp = e.target.closest('.speak');
+    if (sp) {
+      e.stopPropagation();
+      speak(sp, sp.dataset.text, sp.dataset.lang);
+      return;
+    }
+    const head = e.target.closest('.tense-head');
+    if (head) {
+      const i = parseInt(head.dataset.step, 10);
+      if (!isNaN(i)) stepTense(i);
+    }
+  });
+
   // Synthèse vocale
   let voices = [];
   function loadVoices() { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
@@ -323,15 +343,15 @@
       const lines = langs.map(L => `
         <div class="line ${L.k}">
           <span class="tag ${L.k}">${L.label}</span>
-          <span>${t[L.k]}</span>
-          <button class="speak" type="button" onclick="event.stopPropagation(); speak(this, ${JSON.stringify(t[L.k])}, '${L.bcp}')" aria-label="Écouter">🔊</button>
+          <span>${esc(t[L.k])}</span>
+          <button class="speak" type="button" data-text="${esc(t[L.k])}" data-lang="${L.bcp}" aria-label="Écouter">🔊</button>
         </div>
       `).join('');
       return `
         <div class="tense" data-ti="${i}" data-stage="0">
-          <div class="tense-head" onclick="stepTense(${i})">
-            <span class="tense-name">${t.name}</span>
-            <span class="nuance">${t.nuance}</span>
+          <div class="tense-head" data-step="${i}">
+            <span class="tense-name">${esc(t.name)}</span>
+            <span class="nuance">${esc(t.nuance)}</span>
             <button class="toggle" type="button">voir FR</button>
           </div>
           <div class="sentences">${lines}</div>
